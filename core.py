@@ -85,8 +85,10 @@ class DownloaderCore:
         if logger:
             ydl_opts['logger'] = logger
 
-        # 브라우저 쿠키 사용 (로그인 필요한 사이트용)
-        if options.get('cookies_browser'):
+        if options.get('cookie_file'):
+            ydl_opts['cookiefile'] = options.get('cookie_file')
+        # 브라우저 쿠키 사용 (로그인 필요한 사이트용) - 파일이 없을 때만
+        elif options.get('cookies_browser'):
             # Chrome이 가장 일반적이므로 기본값으로 설정. 필요시 옵션화 가능.
             # Edge를 쓴다면 'edge', Firefox는 'firefox' 등으로 변경 가능
             ydl_opts['cookiesfrombrowser'] = ('chrome', ) 
@@ -133,6 +135,8 @@ class DownloaderCore:
             # Chrome 쿠키 잠금 에러에 대한 친절한 메시지 추가
             if "Could not copy Chrome cookie database" in error_msg:
                 error_msg = f"오류: Chrome 브라우저가 실행 중이어서 인증 정보를 가져올 수 없습니다.\nChrome을 완전히 종료(백그라운드 포함)한 후 다시 시도해주세요.\n\n(원문: {error_msg})"
+            elif "DPAPI" in error_msg:
+                error_msg = f"오류: Chrome 쿠키 암호 해독에 실패했습니다.\n이 문제는 보통 권한 문제나 보안 설정 때문입니다.\n해결책: 'Get cookies.txt LOCALLY' 크롬 확장 프로그램을 설치하여\ncookies.txt 파일을 추출한 뒤, 프로그램에서 해당 파일을 선택하여 시도해주세요.\n\n(원문: {error_msg})"
             
             if logger:
                 logger.error(f"Download failed: {error_msg}")

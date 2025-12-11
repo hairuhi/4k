@@ -224,10 +224,28 @@ del "%~f0"
         sub_var = ctk.BooleanVar(value=False)
         ctk.CTkCheckBox(settings_frame, text="자막 (KO/EN)", variable=sub_var).grid(row=0, column=3, padx=10, pady=10)
 
-        # Browser Cookies (Optional)
-        cookie_var = ctk.BooleanVar(value=False)
         if show_cookie_option:
-            ctk.CTkCheckBox(settings_frame, text="브라우저 쿠키 사용 (Chrome)", variable=cookie_var).grid(row=0, column=4, padx=10, pady=10)
+            # Authentication Group
+            auth_frame = ctk.CTkFrame(settings_frame, fg_color="transparent")
+            auth_frame.grid(row=0, column=4, padx=5, pady=5)
+
+            cookie_var = ctk.BooleanVar(value=False)
+            ctk.CTkCheckBox(auth_frame, text="Chrome 쿠키", variable=cookie_var).pack(side="left", padx=5)
+            
+            # Cookie File
+            self.cookie_file_path = ctk.StringVar(value="")
+            
+            def select_cookie_file():
+                f = filedialog.askopenfilename(filetypes=[("Text files", "*.txt"), ("All files", "*.*")])
+                if f:
+                    self.cookie_file_path.set(f)
+                    file_btn.configure(text="Cookies.txt 선택됨", fg_color="green")
+            
+            file_btn = ctk.CTkButton(auth_frame, text="Cookies.txt 선택", width=100, command=select_cookie_file)
+            file_btn.pack(side="left", padx=5)
+        else:
+            cookie_var = ctk.BooleanVar(value=False)
+            self.cookie_file_path = ctk.StringVar(value="")
 
         # Save Path
         path_entry = ctk.CTkEntry(settings_frame, placeholder_text="저장 경로")
@@ -496,7 +514,8 @@ del "%~f0"
             'type': type_var.get(),
             'resolution': resolution,
             'subtitles': sub_var.get(),
-            'cookies_browser': cookie_var.get()
+            'cookies_browser': cookie_var.get(),
+            'cookie_file': self.cookie_file_path.get() if hasattr(self, 'cookie_file_path') else None
         }
 
         self._add_download_task(url, options)
