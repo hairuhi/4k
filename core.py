@@ -130,6 +130,10 @@ class DownloaderCore:
                 return {'success': True, 'info': info}
         except Exception as e:
             error_msg = str(e)
+            # Chrome 쿠키 잠금 에러에 대한 친절한 메시지 추가
+            if "Could not copy Chrome cookie database" in error_msg:
+                error_msg = f"오류: Chrome 브라우저가 실행 중이어서 인증 정보를 가져올 수 없습니다.\nChrome을 완전히 종료(백그라운드 포함)한 후 다시 시도해주세요.\n\n(원문: {error_msg})"
+            
             if logger:
                 logger.error(f"Download failed: {error_msg}")
             return {'success': False, 'error': error_msg}
