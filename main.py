@@ -139,6 +139,7 @@ class App(ctk.CTk):
         available_tabs = {
             "YouTube": lambda t: self.setup_tab(t, "YouTube"),
             "YouTube Channel": lambda t: self.setup_channel_tab(t),
+            "Udemy": lambda t: self.setup_tab(t, "Udemy", show_cookie_option=True),
             "FC2": lambda t: self.setup_tab(t, "FC2", show_cookie_option=True),
             "Pornhub": lambda t: self.setup_tab(t, "Pornhub", show_cookie_option=True),
             "OnlyFans": lambda t: self.setup_tab(t, "OnlyFans", show_cookie_option=True),
@@ -439,7 +440,7 @@ del "%~f0"
         self.module_vars = {}
         # Module Toggles
         self.module_vars = {}
-        for mod_name in ["YouTube", "YouTube Channel", "FC2", "Pornhub", "OnlyFans", "XFans", "ScreenRecorder"]:
+        for mod_name in ["YouTube", "YouTube Channel", "Udemy", "FC2", "Pornhub", "OnlyFans", "XFans", "ScreenRecorder"]:
             var = ctk.BooleanVar(value=self.config_manager.get_module_status(mod_name))
             chk = ctk.CTkCheckBox(modules_frame, text=mod_name, variable=var)
             chk.pack(anchor="w", padx=5, pady=5)
