@@ -61,8 +61,9 @@ class DownloaderCore:
             'progress_hooks': [progress_callback] if progress_callback else [],
             'quiet': True,
             'no_warnings': True,
+            'user_agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
         }
-
+    
         # FFmpeg 경로 설정
         if getattr(sys, 'frozen', False):
             # 1. EXE와 같은 경로 확인
@@ -137,6 +138,8 @@ class DownloaderCore:
                 error_msg = f"오류: Chrome 브라우저가 실행 중이어서 인증 정보를 가져올 수 없습니다.\nChrome을 완전히 종료(백그라운드 포함)한 후 다시 시도해주세요.\n\n(원문: {error_msg})"
             elif "DPAPI" in error_msg:
                 error_msg = f"오류: Chrome 쿠키 암호 해독에 실패했습니다.\n이 문제는 보통 권한 문제나 보안 설정 때문입니다.\n해결책: 'Get cookies.txt LOCALLY' 크롬 확장 프로그램을 설치하여\ncookies.txt 파일을 추출한 뒤, 프로그램에서 해당 파일을 선택하여 시도해주세요.\n\n(원문: {error_msg})"
+            elif "403" in error_msg and "Forbidden" in error_msg:
+                 error_msg = f"오류: 403 Forbidden (접근 거부/차단됨)\n서버에서 접근을 차단했습니다. 다음을 확인해주세요:\n1. 쿠키 파일(cookies.txt)이 만료되었거나 잘못되었습니다. 다시 추출해주세요.\n2. Udemy의 보안 정책(Cloudflare 등)이 강화되었을 수 있습니다.\n\n(원문: {error_msg})"
             
             if logger:
                 logger.error(f"Download failed: {error_msg}")
