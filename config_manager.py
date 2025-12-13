@@ -7,7 +7,6 @@ DEFAULT_CONFIG = {
     "modules": {
         "YouTube": True,
         "YouTube Channel": True,
-        "Udemy": True,
         "FC2": True,
         "Pornhub": True,
         "OnlyFans": True,

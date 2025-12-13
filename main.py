@@ -139,7 +139,6 @@ class App(ctk.CTk):
         available_tabs = {
             "YouTube": lambda t: self.setup_tab(t, "YouTube"),
             "YouTube Channel": lambda t: self.setup_channel_tab(t),
-            "Udemy": lambda t: self.setup_tab(t, "Udemy", show_cookie_option=True),
             "FC2": lambda t: self.setup_tab(t, "FC2", show_cookie_option=True),
             "Pornhub": lambda t: self.setup_tab(t, "Pornhub", show_cookie_option=True),
             "OnlyFans": lambda t: self.setup_tab(t, "OnlyFans", show_cookie_option=True),
@@ -225,27 +224,7 @@ del "%~f0"
         ctk.CTkCheckBox(settings_frame, text="자막 (KO/EN)", variable=sub_var).grid(row=0, column=3, padx=10, pady=10)
 
         if show_cookie_option:
-            # Authentication Group
-            auth_frame = ctk.CTkFrame(settings_frame, fg_color="transparent")
-            auth_frame.grid(row=0, column=4, padx=5, pady=5)
-
-            cookie_var = ctk.BooleanVar(value=False)
-            ctk.CTkCheckBox(auth_frame, text="Chrome 쿠키", variable=cookie_var).pack(side="left", padx=5)
-            
-            # Cookie File
-            self.cookie_file_path = ctk.StringVar(value="")
-            
-            def select_cookie_file():
-                f = filedialog.askopenfilename(filetypes=[("Text files", "*.txt"), ("All files", "*.*")])
-                if f:
-                    self.cookie_file_path.set(f)
-                    file_btn.configure(text="Cookies.txt 선택됨", fg_color="green")
-            
-            file_btn = ctk.CTkButton(auth_frame, text="Cookies.txt 선택", width=100, command=select_cookie_file)
-            file_btn.pack(side="left", padx=5)
-        else:
-            cookie_var = ctk.BooleanVar(value=False)
-            self.cookie_file_path = ctk.StringVar(value="")
+            ctk.CTkCheckBox(settings_frame, text="브라우저 쿠키 사용 (Chrome)", variable=cookie_var).grid(row=0, column=4, padx=10, pady=10)
 
         # Save Path
         path_entry = ctk.CTkEntry(settings_frame, placeholder_text="저장 경로")
@@ -458,7 +437,7 @@ del "%~f0"
         self.module_vars = {}
         # Module Toggles
         self.module_vars = {}
-        for mod_name in ["YouTube", "YouTube Channel", "Udemy", "FC2", "Pornhub", "OnlyFans", "XFans", "ScreenRecorder"]:
+        for mod_name in ["YouTube", "YouTube Channel", "FC2", "Pornhub", "OnlyFans", "XFans", "ScreenRecorder"]:
             var = ctk.BooleanVar(value=self.config_manager.get_module_status(mod_name))
             chk = ctk.CTkCheckBox(modules_frame, text=mod_name, variable=var)
             chk.pack(anchor="w", padx=5, pady=5)
@@ -514,8 +493,7 @@ del "%~f0"
             'type': type_var.get(),
             'resolution': resolution,
             'subtitles': sub_var.get(),
-            'cookies_browser': cookie_var.get(),
-            'cookie_file': self.cookie_file_path.get() if hasattr(self, 'cookie_file_path') else None
+            'cookies_browser': cookie_var.get()
         }
 
         self._add_download_task(url, options)
