@@ -223,6 +223,7 @@ del "%~f0"
         sub_var = ctk.BooleanVar(value=False)
         ctk.CTkCheckBox(settings_frame, text="자막 (KO/EN)", variable=sub_var).grid(row=0, column=3, padx=10, pady=10)
 
+        cookie_var = ctk.BooleanVar(value=False)
         if show_cookie_option:
             ctk.CTkCheckBox(settings_frame, text="브라우저 쿠키 사용 (Chrome)", variable=cookie_var).grid(row=0, column=4, padx=10, pady=10)
 
