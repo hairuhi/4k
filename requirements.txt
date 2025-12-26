@@ -1,4 +1,7 @@
-yt-dlp
-customtkinter
-Pillow
+fastapi
+uvicorn
+jinja2
+python-multipart
+yt-dlp>=2024.01.0
 requests
+curl-cffi

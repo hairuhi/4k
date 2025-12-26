@@ -11,6 +11,8 @@ DEFAULT_CONFIG = {
         "Pornhub": True,
         "OnlyFans": True,
         "XFans": True,
+        "Supjav": True,
+        "Udemy": True,
         "ScreenRecorder": True
     },
     "screen_recorder": {

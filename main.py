@@ -143,6 +143,8 @@ class App(ctk.CTk):
             "Pornhub": lambda t: self.setup_tab(t, "Pornhub", show_cookie_option=True),
             "OnlyFans": lambda t: self.setup_tab(t, "OnlyFans", show_cookie_option=True),
             "XFans": lambda t: self.setup_tab(t, "XFans", show_cookie_option=True),
+            "Supjav": lambda t: self.setup_tab(t, "Supjav", show_cookie_option=True),
+            "Udemy": lambda t: self.setup_tab(t, "Udemy", show_cookie_option=True),
             "ScreenRecorder": lambda t: self.setup_screen_recorder_tab(t)
         }
 
@@ -223,25 +225,87 @@ del "%~f0"
         sub_var = ctk.BooleanVar(value=False)
         ctk.CTkCheckBox(settings_frame, text="자막 (KO/EN)", variable=sub_var).grid(row=0, column=3, padx=10, pady=10)
 
-        cookie_var = ctk.BooleanVar(value=False)
+        # Cookie Settings (Modified for robust Udemy support)
+        cookie_var = ctk.BooleanVar(value=False) # For legacy simple checkbox (kept for other tabs if needed)
+        cookie_path_entry = None
+        auth_method_var = None
+
         if show_cookie_option:
-            ctk.CTkCheckBox(settings_frame, text="브라우저 쿠키 사용 (Chrome)", variable=cookie_var).grid(row=0, column=4, padx=10, pady=10)
+            # Separator
+            ctk.CTkLabel(settings_frame, text="--------------------------------------------------").grid(row=1, column=0, columnspan=5, pady=5)
+            
+            # Auth Method Label
+            ctk.CTkLabel(settings_frame, text="인증 방식:").grid(row=2, column=0, padx=10, pady=10, sticky="w")
+            
+            # Auth Method Radio Buttons
+            auth_method_var = ctk.StringVar(value="browser")
+            
+            # Helper to toggle entry state
+            def toggle_cookie_entry():
+                if auth_method_var.get() == "file":
+                    cookie_path_entry.configure(state="normal")
+                    cookie_browse_btn.configure(state="normal")
+                else:
+                    cookie_path_entry.configure(state="disabled")
+                    cookie_browse_btn.configure(state="disabled")
+
+            ctk.CTkRadioButton(settings_frame, text="브라우저에서 자동 추출", variable=auth_method_var, value="browser", command=toggle_cookie_entry).grid(row=2, column=1, padx=10, pady=10, sticky="w")
+            ctk.CTkRadioButton(settings_frame, text="cookies.txt 파일 사용", variable=auth_method_var, value="file", command=toggle_cookie_entry).grid(row=2, column=2, padx=10, pady=10, sticky="w")
+            
+            # Browser Selection (Optional, adjacent to browser radio)
+            browser_option = ctk.CTkOptionMenu(settings_frame, values=["chrome", "edge", "firefox"], width=100)
+            browser_option.grid(row=2, column=1, padx=(180, 0), pady=10) # Overlap hack or positioning
+            # Let's clean up grid to be better.
+            # Row 2: "인증 방식:", Radio(Browser), Combo(Browser), Radio(File)
+            # Actually grid layout is tricky with current setup. Let's start new row.
+            
+            # Re-doing Auth Grid for clarity
+            # Row 2: Header
+            # Row 3: Controls
+            
+            # But let's stick to the visible screenshot layout idea:
+            # Row 2: Radio(Browser) ... Radio(File)
+            # Row 3: Configs for them
+            
+            # Let's override the row 2 items I just added above with a cleaner sub-frame? 
+            # Or just use rows 2 and 3.
+            
+            # Row 2: Browser Option
+            ctk.CTkLabel(settings_frame, text="브라우저:").grid(row=3, column=0, padx=10, pady=5, sticky="e")
+            self.browser_combo = ctk.CTkOptionMenu(settings_frame, values=["chrome", "edge", "firefox", "whale"], width=120)
+            self.browser_combo.grid(row=3, column=1, padx=10, pady=5, sticky="w")
+            
+            # Row 3: File Option
+            cookie_path_entry = ctk.CTkEntry(settings_frame, placeholder_text="cookies.txt 경로", width=200)
+            cookie_path_entry.grid(row=3, column=2, columnspan=2, padx=10, pady=5, sticky="ew")
+            cookie_path_entry.configure(state="disabled")
+            
+            cookie_browse_btn = ctk.CTkButton(settings_frame, text="...", width=30, command=lambda: self.browse_file(cookie_path_entry), state="disabled")
+            cookie_browse_btn.grid(row=3, column=4, padx=10, pady=5)
+
 
         # Save Path
+        path_start_row = 4 if show_cookie_option else 1
         path_entry = ctk.CTkEntry(settings_frame, placeholder_text="저장 경로")
         path_entry.insert(0, os.path.join(os.getcwd(), "downloads"))
-        path_entry.grid(row=1, column=0, columnspan=3 if not show_cookie_option else 4, padx=10, pady=10, sticky="ew")
+        path_entry.grid(row=path_start_row, column=0, columnspan=3 if not show_cookie_option else 4, padx=10, pady=10, sticky="ew")
         
         browse_btn = ctk.CTkButton(settings_frame, text="...", width=30, command=lambda: self.browse_path(path_entry))
-        browse_btn.grid(row=1, column=3 if not show_cookie_option else 4, padx=10, pady=10)
+        browse_btn.grid(row=path_start_row, column=3 if not show_cookie_option else 4, padx=10, pady=10)
 
         # Download Button
-        download_btn = ctk.CTkButton(tab, text="다운로드 추가", 
-                                     command=lambda: self.add_download(url_entry, type_var, res_option, sub_var, cookie_var, path_entry))
+        download_btn = ctk.CTkButton(tab, text=f"{name} 다운로드 추가", 
+                                     command=lambda: self.add_download(url_entry, type_var, res_option, sub_var, cookie_var, path_entry, auth_method_var, cookie_path_entry, getattr(self, 'browser_combo', None)))
         download_btn.grid(row=2, column=0, columnspan=2, padx=10, pady=10, sticky="ew")
 
         # Configure Grid
         tab.grid_columnconfigure(1, weight=1)
+
+    def browse_file(self, entry_widget):
+        path = filedialog.askopenfilename(filetypes=[("Text files", "*.txt"), ("All files", "*.*")])
+        if path:
+            entry_widget.delete(0, "end")
+            entry_widget.insert(0, path)
 
     def setup_screen_recorder_tab(self, tab):
         # Instructions
@@ -438,7 +502,7 @@ del "%~f0"
         self.module_vars = {}
         # Module Toggles
         self.module_vars = {}
-        for mod_name in ["YouTube", "YouTube Channel", "FC2", "Pornhub", "OnlyFans", "XFans", "ScreenRecorder"]:
+        for mod_name in ["YouTube", "YouTube Channel", "FC2", "Pornhub", "OnlyFans", "XFans", "Supjav", "Udemy", "ScreenRecorder"]:
             var = ctk.BooleanVar(value=self.config_manager.get_module_status(mod_name))
             chk = ctk.CTkCheckBox(modules_frame, text=mod_name, variable=var)
             chk.pack(anchor="w", padx=5, pady=5)
@@ -472,7 +536,7 @@ del "%~f0"
             entry_widget.delete(0, "end")
             entry_widget.insert(0, path)
 
-    def add_download(self, url_entry, type_var, res_option, sub_var, cookie_var, path_entry):
+    def add_download(self, url_entry, type_var, res_option, sub_var, cookie_var, path_entry, auth_method_var=None, cookie_path_entry=None, browser_combo=None):
         url = url_entry.get()
         if not url:
             messagebox.showerror("Error", "URL을 입력해주세요.")
@@ -489,12 +553,33 @@ del "%~f0"
         res_val = res_option.get()
         resolution = None if res_val == "Best" else res_val
         
+        # Determine Cookie Strategy
+        cookies_browser = None
+        cookie_file = None
+        
+        if auth_method_var: # High detail auth mode (Udemy etc)
+            method = auth_method_var.get()
+            if method == "browser":
+                if browser_combo:
+                    cookies_browser = browser_combo.get()
+                else:
+                    cookies_browser = "chrome"
+            elif method == "file":
+                if cookie_path_entry:
+                    cookie_file = cookie_path_entry.get()
+                    if not os.path.exists(cookie_file):
+                        messagebox.showerror("Error", "쿠키 파일이 존재하지 않습니다.")
+                        return
+        elif cookie_var and cookie_var.get(): # Legacy simple check
+            cookies_browser = "chrome"
+
         options = {
             'save_path': save_path,
             'type': type_var.get(),
             'resolution': resolution,
             'subtitles': sub_var.get(),
-            'cookies_browser': cookie_var.get()
+            'cookies_browser': cookies_browser,
+            'cookie_file': cookie_file
         }
 
         self._add_download_task(url, options)

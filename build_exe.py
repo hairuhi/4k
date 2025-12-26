@@ -10,9 +10,9 @@ print(f"CustomTkinter path: {ctk_path}")
 
 # Clean up previous build artifacts
 if os.path.exists('build'):
-    shutil.rmtree('build')
+    shutil.rmtree('build', ignore_errors=True)
 if os.path.exists('dist'):
-    shutil.rmtree('dist')
+    shutil.rmtree('dist', ignore_errors=True)
 
 PyInstaller.__main__.run([
     'main.py',
@@ -20,7 +20,8 @@ PyInstaller.__main__.run([
     '--onefile',
     '--windowed',
     '--noconfirm',
-    '--clean',  # Add clean flag to clear cache
+    '--clean',
+    '--workpath=./build_release', # Avoid locked build folder
     f'--add-data={ctk_path};customtkinter',
     '--icon=NONE', # 아이콘이 있다면 설정, 없으면 기본
 ])
@@ -33,10 +34,14 @@ if not os.path.exists(dist_dir):
 
 for binary in ['ffmpeg.exe', 'ffprobe.exe']:
     src = os.path.join(os.getcwd(), binary)
+    if not os.path.exists(src):
+        # Check parent directory
+        src = os.path.join(os.path.dirname(os.getcwd()), binary)
+    
     dst = os.path.join(dist_dir, binary)
     if os.path.exists(src):
         shutil.copy2(src, dst)
         print(f"Copied {binary} to {dist_dir}")
     else:
-        print(f"Warning: {binary} not found in source directory.")
+        print(f"Warning: {binary} not found in source or parent directory.")
 
